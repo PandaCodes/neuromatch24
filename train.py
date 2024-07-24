@@ -51,6 +51,7 @@ def train(
     environment = tonic.environments.distribute(
         lambda: eval(_environment), parallel, sequential
     )
+    environment.initialize(seed)
     test_environment = tonic.environments.distribute(lambda: eval(_environment))
 
     # Build the agent.
@@ -96,8 +97,19 @@ def train(
     if after_training:
         exec(after_training)
 
-train('import tonic.torch\nfrom tasks.swim_in_viscous_spheres import load_env',
+#train('import tonic.torch\nfrom tasks.swim_in_viscous_spheres import load_env',
+#      'tonic.torch.agents.PPO(model=ppo_mlp_model(actor_sizes=(256, 256), critic_sizes=(256,256)))',
+#      'tonic.environments.ControlSuite("swimmer-swim_in_viscous_spheres")',
+#      name = 'mlp_256_spheres',
+#      trainer = 'tonic.Trainer(steps=int(5e5),save_steps=int(1e5))')
+
+#from tasks.swim_in_viscous_spheres import load_env
+
+#ppo_controller_swimmer_model(n_joints=5,critic_sizes=(256,256), controller_args={\"input_dim\":19})
+import task_viscocity
+train('import tonic.torch',
       'tonic.torch.agents.PPO(model=ppo_mlp_model(actor_sizes=(256, 256), critic_sizes=(256,256)))',
-      'tonic.environments.ControlSuite("swimmer-swim_in_viscous_spheres")',
-      name = 'mlp_256_spheres',
-      trainer = 'tonic.Trainer(steps=int(5e5),save_steps=int(1e5))')
+  'tonic.environments.ControlSuite("swimmer-swim_vis0",time_feature=False)',
+  name = 'mlp_ppo_vis0_10M',
+  trainer = 'tonic.Trainer(steps=int(1e7),save_steps=int(5e4))',
+  parallel=20)

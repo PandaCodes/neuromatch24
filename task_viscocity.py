@@ -9,8 +9,16 @@ from dm_control import suite
 from dm_control.suite.wrappers import pixels
 
 from utils import *
+from lxml import etree
 
 _SWIM_SPEED = 0.1
+
+def update_viscocity(model_string, viscocity):
+    tree = etree.fromstring(model_string)
+    option = tree.find('./option')
+    option.set('viscosity', str(viscocity))
+    
+    return etree.tostring(tree, pretty_print=True)
 
 #@swimmer.SUITE.add()
 def swim(
