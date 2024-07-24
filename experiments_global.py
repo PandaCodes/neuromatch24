@@ -36,11 +36,18 @@ import tonic
 from tonic.torch import models, normalizers
 import torch
 
-from utils import update_viscocity
-
 from models.model_creators import *
 
+from lxml import etree
+
 _SWIM_SPEED = 0.1
+
+def update_viscocity(model_string, viscocity):
+    tree = etree.fromstring(model_string)
+    option = tree.find('./option')
+    option.set('viscosity', str(viscocity))
+    
+    return etree.tostring(tree, pretty_print=True)
 
 #@swimmer.SUITE.add()
 def swim(

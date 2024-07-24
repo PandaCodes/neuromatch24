@@ -1,15 +1,7 @@
-from lxml import etree
 import imageio
 import os
 import typing as T
 import numpy as np
-
-def update_viscocity(model_string, viscocity):
-    tree = etree.fromstring(model_string)
-    option = tree.find('./option')
-    option.set('viscosity', str(viscocity))
-    
-    return etree.tostring(tree, pretty_print=True)
 
 # @title Utility code for displaying videos
 def write_video(
