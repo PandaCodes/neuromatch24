@@ -44,6 +44,7 @@ class SwimmerActor(nn.Module):
         # Generate high-level control signals.
         if self.controller:
             right, left, speed = self.controller(observations)
+            right, left, speed = right.unsqueeze(-1), left.unsqueeze(-1), speed.unsqueeze(-1)
         else:
             right, left, speed = None, None, None
 
@@ -56,8 +57,10 @@ class SwimmerActor(nn.Module):
             speed_control=speed,
         )
 
+        
         # Pass through distribution for stochastic policy.
         if self.distribution:
             actions = self.distribution(actions)
+        
 
         return actions
