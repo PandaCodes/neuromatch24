@@ -9,7 +9,7 @@ def update_xml_with_food_zone(xml_string: str):
     tree = etree.fromstring(xml_string)
     worldbody = tree.find('./worldbody')
 
-    food_zone = etree.Element("geom", name="food_zone", type="box", pos="0 0 0.05", size="0.05 0.05 0.05", material="target")
+    food_zone = etree.Element("geom", name="target", type="box", pos="0 0 0.05", size="0.05 0.05 0.05", material="target")
 
     # Find the old element
     old_element = worldbody.find(".//geom[@name='target']")
@@ -45,15 +45,15 @@ class Swim(swimmer.Swimmer):
     def initialize_episode(self, physics):
         super().initialize_episode(physics)
         self.food_zone_pos = self._random_food_zone()
-        physics.named.data.geom_xpos['food_zone'][:2] = self.food_zone_pos
+        physics.named.data.geom_xpos['target'][:2] = self.food_zone_pos
 
     def get_observation(self, physics):
         obs = {}
         obs['joints'] = physics.joints()
         obs['position'] = physics.named.data.geom_xpos['nose'][:2]
-        obs['food_zone'] = self.food_zone_pos
+        # obs['food_zone'] = self.food_zone_pos
         obs['smell_strength'] = self._smell_strength(obs['position'])
-        obs['to_target'] = physics.nose_to_target()
+        # obs['to_target'] = physics.nose_to_target()
         obs['body_velocities'] = physics.body_velocities()
         return obs
 
@@ -64,10 +64,12 @@ class Swim(swimmer.Swimmer):
     def get_reward(self, physics):
         position = physics.named.data.geom_xpos['nose'][:2]
         smell_strength = self._smell_strength(position)
-        vel = physics.body_velocities()
+        vel = -physics.named.data.sensordata["head_vel"][1]
         reward = smell_strength + 0.1 * vel * self.reward_coeff
         if np.linalg.norm(position - self.food_zone_pos) > self.food_zone_size:
             reward -= self.reward_coeff *  (0.1 * np.exp(np.linalg.norm(position - self.food_zone_pos)))
+        print(reward)
+
         return reward
 
 @swimmer.SUITE.add()
@@ -76,6 +78,7 @@ def swim_food(
     time_limit=swimmer._DEFAULT_TIME_LIMIT,
     random=None,
     aversion=False,
+    **environment_kwargs,
 ):
     """Returns the Swim task for a n-link swimmer."""
     task = Swim(arena_size=(10, 10), aversion=aversion)
