@@ -200,7 +200,7 @@ if __name__ == "__main__":
         results.append(
             run_multiple(
                 sys.argv[1], 
-                1, 
+                10, 
                 environment=env_string
             )
         )

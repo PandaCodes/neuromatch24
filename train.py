@@ -17,6 +17,8 @@ from acme import wrappers
 
 from models.model_creators import *
 
+import numpy as np
+
 def train(
     header,
     agent,
@@ -106,10 +108,25 @@ def train(
 #from tasks.swim_in_viscous_spheres import load_env
 
 #ppo_controller_swimmer_model(n_joints=5,critic_sizes=(256,256), controller_args={\"input_dim\":19})
-import task_viscocity
+from tasks.swim_in_viscous_spheres import load_env
 train('import tonic.torch',
-      'tonic.torch.agents.PPO(model=ppo_mlp_model(actor_sizes=(256, 256), critic_sizes=(256,256)))',
-  'tonic.environments.ControlSuite("swimmer-swim_vis0",time_feature=False)',
-  name = 'mlp_ppo_vis0_10M',
-  trainer = 'tonic.Trainer(steps=int(1e7),save_steps=int(5e4))',
-  parallel=20)
+  'tonic.torch.agents.PPO(model=ppo_controller_swimmer_model(n_joints=5,critic_sizes=(256,256), controller_args={\"input_dim\":18, \"hidden_dim\":16, \"n_hidden\":2}))',
+  'tonic.environments.ControlSuite("swimmer-swim_in_viscous_spheres",time_feature=True)',
+  name = 'ncap_head_spheres',
+  trainer = 'tonic.Trainer(steps=int(1e1),save_steps=int(5e6))',
+  after_training= 'np.save("measurements.npy",trainer.measurements)',
+  parallel=1)
+
+#train('import tonic.torch',
+#  'tonic.torch.agents.PPO(model=ppo_swimmer_model(n_joints=5,critic_sizes=(256,256)))',
+#  'tonic.environments.ControlSuite("swimmer-swim_in_viscous_spheres",time_feature=True)',
+#  name = 'ncap_nohead_spheres',
+#  trainer = 'tonic.Trainer(steps=int(5e6),save_steps=int(5e6))',
+#  parallel=16)
+#
+#train('import tonic.torch',
+#  'tonic.torch.agents.PPO(model=ppo_mlp_model(actor_sizes=(256,256),critic_sizes=(256,256)))',
+#  'tonic.environments.ControlSuite("swimmer-swim_in_viscous_spheres",time_feature=False)',
+#  name = 'mlp_spheres',
+#  trainer = 'tonic.Trainer(steps=int(5e6),save_steps=int(5e6))',
+#  parallel=16)
